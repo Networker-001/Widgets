@@ -8,7 +8,7 @@ Willkommen in meiner Sammlung von Lua-Widgets für FrSky Ethos und die RadioMast
 
 | Widget Name | Beschreibung | Datei / Ordner |
 | :--- | :--- | :--- |
-| **Big LED XXL** | Große Schrift für Ethos. | [Zum Ordner](./ethos/BigLed/) / [main.lua](./ethos/BigLed/main.lua) |
+| **Big LED XXL** | Große Schrift für Ethos ohne Performance-Problemen und Schwellwerten. | [Zum Ordner](./ethos/BigLed/) / [main.lua](./ethos/BigLed/main.lua) |
 
 ---
 
