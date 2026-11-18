@@ -6,17 +6,17 @@ Willkommen in meiner Sammlung von Lua-Widgets für FrSky Ethos und die RadioMast
 
 ## Ethos Widgets
 
-| Widget Name | Beschreibung | Datei / Ordner |
-| :--- | :--- | :--- |
-| **Big LED XXL** | Große Schrift für Ethos mit Schwellwerten ohne Performance-Problemen . | [Zum Ordner](./ethos/BigLed/) / [main.lua](./ethos/BigLed/main.lua) |
+| Vorschau | Widget Name | Beschreibung | Datei / Ordner |
+| :--- | :--- | :--- | :--- |
+| <img src="./ethos/BigLed/BigLed.png" width="250" alt="Big LED XXL Vorschau"> | **Big LED XXL** | Große Schrift für Ethos mit Schwellwerten ohne Performance-Probleme. | [Zum Ordner](./ethos/BigLed/)<br>[main.lua](./ethos/BigLed/main.lua) |
 
 ---
 
 ## RadioMaster TX16S Widgets
 
-| Widget Name | Beschreibung | Datei / Ordner |
-| :--- | :--- | :--- |
-| **Mein TX16S Widget** | Kurze Beschreibung der Funktion. | [Zum Ordner](./radiomaster-tx16s/mein-widget/) / [main.lua](./radiomaster-tx16s/mein-widget/main.lua) |
+| Vorschau | Widget Name | Beschreibung | Datei / Ordner |
+| :--- | :--- | :--- | :--- |
+| <img src="./radiomaster-tx16s/mein-widget/preview.png" width="250" alt="Vorschau"> | **Mein TX16S Widget** | Kurze Beschreibung der Funktion. | [Zum Ordner](./radiomaster-tx16s/mein-widget/)<br>[main.lua](./radiomaster-tx16s/mein-widget/main.lua) |
 
 ---
 
