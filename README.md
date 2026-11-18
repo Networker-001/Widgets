@@ -16,7 +16,7 @@ Willkommen in meiner Sammlung von Lua-Widgets für FrSky Ethos und die RadioMast
 
 | Vorschau | Widget Name | Beschreibung | Datei / Ordner |
 | :--- | :--- | :--- | :--- |
-| <img src="./radiomaster-tx16s/mein-widget/preview.png" width="250" alt="Vorschau"> | **Mein TX16S Widget** | Kurze Beschreibung der Funktion. | [Zum Ordner](./radiomaster-tx16s/mein-widget/)<br>[main.lua](./radiomaster-tx16s/mein-widget/main.lua) |
+| <img src="./radiomaster-tx16s/mein-widget/preview.png" width="250" alt="Vorschau"> | **AllTelem** | Direkte Anzeige aller Telemetriesensoren. | [Zum Ordner](./EdgeTX/AllTelem/)<br>[main.lua](./EdgeTX/AllTelem/main.lua) |
 
 ---
 
