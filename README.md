@@ -17,7 +17,7 @@ Willkommen in meiner Sammlung von Lua-Widgets für FrSky Ethos und die RadioMast
 | Vorschau | Widget Name | Beschreibung | Datei / Ordner |
 | :--- | :--- | :--- | :--- |
 | <img src="./EdgeTX/AllTelem/preview.png" width="250" alt="AllTelem Vorschau"> | **AllTelem** | Direkte Anzeige aller Telemetriesensoren. | [Zum Ordner](./EdgeTX/AllTelem/)<br>[main.lua](./EdgeTX/AllTelem/main.lua) |
-| <img src="./EdgeTX/GPS%20Homer/preview.png" width="250" alt="GPS Homer Vorschau"> | **GPS Homer** | Anpassung zur Anzeige des Steuerkurses RTH von OXS. | [Zum Ordner](./EdgeTX/GPS%20Homer/)<br>[main.lua](./EdgeTX/GPS%20Homer/main.lua) |
+| <img src="./EdgeTX/GPS%20Homer/preview.png" width="250" alt="GPS Homer Vorschau"> | **GPS Homer** | Anpassung zur Anzeige des Steuerkurses RTH von OXS. | [Zum Ordner](./EdgeTX/GPS%20Homer/)<br>[main.lua](./EdgeTX/GPS%20Homer//WIDGETS/GPSHOMER/main.lua) |
 
 ---
 
