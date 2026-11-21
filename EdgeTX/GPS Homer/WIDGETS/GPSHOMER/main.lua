@@ -1012,8 +1012,29 @@ local function drawTile(ctx, z, x0, y0, W, H)
     drawStatusTile(z, "Configuration error", "Please check Tool Flight Bag", true); return
   end
 
+
+
   local ph, gs = r.phase, r.gpsState
   local linkUp = r.linkUp   -- heartbeat only while packets arrive (core)
+
+    -----------------------------------------------------------------------------
+    -- METHODE 1: LIVE DEBUG-TEXT OBEN LINKS OVERLAY
+    -----------------------------------------------------------------------------
+    -- Wir erstellen einen lesbaren Text mit allen wichtigen Werten
+    local debugText = string.format(
+      "HDG: %s | GS: %s | LINK: %s | N_HOME: %s",
+      tostring(r.bearingToHome or "nil"),
+      tostring(gs or "nil"),
+      r.linkUp and "JA" or "NEIN",
+      r.noHome and "JA" or "NEIN"
+    )
+    
+    -- Text zeichnen (x0 + 5 Pixel vom linken Widget-Rand, y0 + 105 Pixel von oben)
+    -- SMLSIZE nutzt die kleinste Schriftart, damit alles in eine Zeile passt
+    lcd.drawText(x0 + sx(105), y0 + sx(5), debugText, SMLSIZE + CUSTOM_COLOR, COLORS.fg)
+    -----------------------------------------------------------------------------
+
+
   if ph == "ENDED" then
     drawEnded(W, H, x0, y0, r, ctx.state)
   elseif ph == "PRE" then
@@ -1027,14 +1048,37 @@ local function drawTile(ctx, z, x0, y0, W, H)
     ctx.smooth = ctx.smooth or {}
     ctx.smooth.rel    = compass.smooth(ctx.smooth.rel,    r.rel)
     ctx.smooth.course = compass.smooth(ctx.smooth.course, r.course)
+
     local d = {
+      gpsState = gs, 
+      rel = ctx.smooth.rel,           -- Der relative Winkel fuer den Pfeil
+      bearingToHome = r.bearingToHome, -- Das Haus auf dem Ring folgt jetzt direkt deinem RP2040!
+      sector = r.sector,
+      courseValid = false,           -- Falsch, damit das Haus fest auf dem Kompassring gezeichnet wird
+      noseEstimated = r.noseEstimated, 
+      course = 0,                    -- Flugrichtung starr auf Norden (0) fixieren
+      distanceM = r.distanceM, 
+      sats = r.sats,
+      alt = r.alt, 
+      gspd = r.gspd, 
+      fixLost = r.fixLost, 
+      noHome = r.noHome, 
+      atHome = false,                -- Auf false zwingen, damit das Haus aus der Mitte auf den Ring wandert!
+      alert = r.alert, 
+      altOver = r.altOver, 
+      distOver = r.distOver,
+    }
+    d = {
       gpsState = gs, rel = ctx.smooth.rel, bearingToHome = r.bearingToHome, sector = r.sector,
       courseValid = r.courseValid, noseEstimated = r.noseEstimated, course = ctx.smooth.course,
       distanceM = r.distanceM, sats = r.sats,
       alt = r.alt, gspd = r.gspd, fixLost = r.fixLost, noHome = r.noHome, atHome = r.atHome,
       alert = r.alert, altOver = r.altOver, distOver = r.distOver,
     }
+   
+    
     drawActive(W, H, x0, y0, d)
+    
     if linkUp then drawHeartbeat(ctx) end
   else -- ACQUIRING
     -- "4 Sats (min 6)": found so far, and the count home needs.

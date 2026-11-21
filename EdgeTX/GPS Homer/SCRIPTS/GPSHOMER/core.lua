@@ -39,6 +39,16 @@ M.CONFIG_PATH = "/SCRIPTS/GPSHOMER/config.lua"
 -- removing one bumps the first and resets the second. Fixes and internal
 -- changes leave it alone. A loader accepts the same first and at least its second.
 
+-- =====================================================================
+-- Networker changes
+-- sats >= 50 has fix >= 100 oxs sets home location
+-- min sats to 106
+-- Range sats to 128
+-- local hdg     = M.validRange(safeGet(S.hdg)*3.6,  0, 360)
+-- sate values from 105 to 128
+-- =====================================================================
+
+
 -- ---------------------------------------------------------------------------
 -- Declarations (single source of truth)
 -- ---------------------------------------------------------------------------
@@ -86,7 +96,7 @@ M.SOUND_KEYS     = { "ready", "fix", "lost", "rec", "alt", "dist" }
 -- (via the tool / config.lua); the rest are fixed core constants (PC edit only).
 -- Times are in SECONDS (converted to ms at each comparison), TICK_MS is in ms.
 M.PARAMS = {
-  HOME_MIN_SATS  = 106,      -- FR-6: min. sats for the home set   (config: homeMinSats)
+  HOME_MIN_SATS   = 106,      -- 106 FR-6: min. sats for the home set   (config: homeMinSats)
   AUDIO           = true,  -- Play announcements at all (false = every sound off; config: audio)
   HAPTIC          = false, -- Vibrate alongside an event sound (opt-in; config: haptic)
   HAPTIC_STRENGTH = 2,     -- Pulse-length tier: 1 = soft, 2 = normal, 3 = strong
@@ -127,7 +137,7 @@ M.HAPTIC_PULSES = { ready = 1, fix = 1, lost = 2, rec = 1, alt = 2, dist = 2 }
 -- Editable ranges: the SINGLE source for both the on-radio editor and the
 -- runtime clamp in normalizeConfig, so they can never drift apart.
 M.LIMITS = {
-  homeMinSats     = { min = 106, max = 128, step = 1 },
+  homeMinSats     = { min = 105, max = 128, step = 1 },
   hapticStrength  = { min = 1, max = 3,  step = 1 },
   maxAlt          = { min = 0, max = 500, step = 10 },
   maxDist         = { min = 0, max = 5000, step = 100 },
@@ -679,9 +689,9 @@ end
 -- Alt is optional: without it there is no altitude and no Max altitude warning.
 local REQUIRED = { "gps", "sats", "gspd", "hdg" }
 
--- Setup errors that need no telemetry, one text each (the settings tool lists
--- them; a widget only shows that there is one): required sensors not
--- discovered in the model. state as kept by update; without it a fresh one.
+ -- Setup errors that need no telemetry, one text each (the settings tool lists
+ -- them; a widget only shows that there is one): required sensors not
+ -- discovered in the model. state as kept by update; without it a fresh one.
 function M.setupErrors(state)
   state = state or M.newState()
   local out = {}
@@ -689,7 +699,7 @@ function M.setupErrors(state)
   -- The compass drawing (also loaded by other widgets) ships with the core.
   local ok, st = pcall(function() return fstat and fstat(M.COMPASS_PATH) end)
   if fstat and ok and not st then
-    out[#out + 1] = "Compass file missing"
+   out[#out + 1] = "Compass file missing"
     out[#out + 1] = "Reinstall GPS Homer"
   end
   local has = sensorsPresent(state, M.SENSORS, nowMs(), SENSOR_CHECK_MS)
@@ -1020,7 +1030,13 @@ function M.readSnapshot(state, now)
   local gps     = M.validGps(rawGps) and { lat = rawGps.lat, lon = rawGps.lon } or nil
   local sats    = M.validRange(safeGet(S.sats), 0, 128)
   local gspd    = M.validRange(safeGet(S.gspd), 0, 500)
+  -- ORIGINAL AUSKOMMENTIERT:
   local hdg     = M.validRange(safeGet(S.hdg),  0, 360)
+  
+  -- NEU: oXs RP2040 Umrechnung (0..100 -> -180..+180 -> 0..360 Grad)
+  --local raw_oxs = safeGet(S.hdg) or 50
+  --local hdg = ((raw_oxs - 50) * 3.6 + 360) % 360
+
   -- Altitude: GAlt when the radio discovered it (EdgeTX names the GPS altitude
   -- so on some setups), else Alt; neither -> nil, never a misleading 0.
   local rawAlt  = readPresent(has, S, "galt")
@@ -1069,12 +1085,14 @@ function M.readSnapshot(state, now)
     end
   end
 
-  return {
+return {
     telem         = telem,
     gps           = gps,
+    -- ORIGINAL AUSKOMMENTIERT:
     sats          = sats,
-    gspd          = gspd,
     hdg           = hdg,
+    oxs_winkel    = hdg,          -- Hier sichern wir deinen umgerechneten 0-360 Winkel
+    gspd          = gspd,
     alt           = alt,
     yaw           = yaw,
     roll          = roll,
@@ -1091,6 +1109,7 @@ function M.readSnapshot(state, now)
     fix           = fix,   -- "NONE" / "2D" / "3D" from the same source as the DOP
     sensorMissing = sensorMissing,
   }
+
 end
 
 -- ---------------------------------------------------------------------------
@@ -1442,17 +1461,39 @@ function M.evaluate(state, snap, now)
 
   -- Derived display values from the last valid telemetry.
   local lat, lon = state.lastLat, state.lastLon
+  
   if lat and lon and state.homeLat then
     result.distanceM     = M.haversine(lat, lon, state.homeLat, state.homeLon)
-    result.bearingToHome = M.bearingTo(lat, lon, state.homeLat, state.homeLon)
+
+
+    --local roher_sensor = getValue("Hdg") or 50
+    --local oxs_grad = ((roher_sensor - 50) * 3.6 + 360) % 360
+
+    local roher_sensor = getValue("Yaw") or 0
+    local oxs_grad = (roher_sensor * 1.8 + 360) % 360
+
+    --local roher_sensor = getValue("Yaw") or 0
+    --local oxs_grad = ((roher_sensor) * 1.8 )
+    
+
+    --oxs_grad   -- Das Haus auf dem Ring folgt deinem oXs
+
+  result.bearingToHome =  oxs_grad 
+
+  --result.bearingToHome = 270
+
+  --result.bearingToHome = M.bearingTo(lat, lon, state.homeLat, state.homeLon)
+
     result.sector        = M.sectorOf(result.bearingToHome)
     M.learnYawOffset(state, state.lastGspd, state.lastHdg, state.lastYaw, state.lastRoll, now)
     -- GPS course (or the yaw estimate while hovering), for the compass ring
     result.courseValid, result.course, result.noseEstimated = M.noseOf(state, now)
-    if result.courseValid then result.rel = M.relAngle(result.bearingToHome, result.course) end
+   -- if result.courseValid then result.rel = M.relAngle(result.bearingToHome, result.course) end
+    result.rel = result.bearingToHome 
     -- (Nearly) on the home point: any direction to it would be GPS noise.
     result.atHome = result.distanceM < P.HOME_NEAR_M
   end
+
 
   -- Flight maxima, like the flown distance only while armed when FM tells.
   local alt = state.lastAlt and state.homeAlt and state.lastAlt - state.homeAlt
@@ -1501,7 +1542,27 @@ function M.evaluate(state, snap, now)
   result.fixLost           = state.fixLost   -- persistent flag: widget colours sats red
   result.alert             = snap.alert      -- "RTH" / "FS" from the FC, nil otherwise
   result.sensorMissing = snap.sensorMissing
+
   finishLive(state, result)
+
+  -- ====================================================
+  -- NEU: UNBLOCKIERBARE INJEKTION FUER OXS RP2040
+  -- ====================================================
+
+  if 1 == 0 then
+  result.phase         = "FLIGHT"   -- Aktiviert die Live-Anzeige am Schreibtisch
+  result.gpsState      = "HOME"     -- Aktiviert das Haus-Symbol
+  result.course        = 0          -- Flugrichtung starr auf Norden (12 Uhr)
+  result.courseValid   = false      -- Zwingt das Haus starr auf den Aussenring
+  result.atHome        = false      -- Verhindert, dass das Haus in die Mitte springt
+  result.distanceM     = 150        -- Feste Entfernung fuer die Schreibtisch-Anzeige
+  result.bearingToHome = 270
+
+  
+  result.bearingToHome = oxs_grad   -- Das Haus auf dem Ring folgt deinem oXs
+  result.rel           = oxs_grad   -- Der Richtungspfeil folgt deinem oXs
+   end
+  -- 2. Jetzt erst wird das Paket an die Grafik uebergeben:
   return result
 end
 

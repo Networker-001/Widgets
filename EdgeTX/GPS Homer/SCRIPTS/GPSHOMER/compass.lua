@@ -185,6 +185,7 @@ end
 -- relative to the course, bearing = deg to home or nil }.
 function C.draw(cx, cy, R, d, northUp, compact, col)
   local r = math.floor(R * 50 / 70)
+
   if not d.course then
     local tr = C.ring(cx, cy, R, 0, d.bearing, compact, true, col)
     drawHome(cx, cy, R, tr, d.bearing, compact, col)
@@ -193,6 +194,8 @@ function C.draw(cx, cy, R, d, northUp, compact, col)
     local tr = C.ring(cx, cy, R, 0, d.bearing, compact, true, col)
     C.arrow(cx, cy, r, d.course, col.fg, col.muted)
     drawHome(cx, cy, R, tr, d.bearing, compact, col)
+
+
   else
     C.ring(cx, cy, R, -d.course, nil, compact, false, col)
     if d.rel then C.arrow(cx, cy, r, d.rel, col.fg, col.muted) end
